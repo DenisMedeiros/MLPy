@@ -5,14 +5,14 @@ import numpy
 from mlpy import *
 
 # XOR Port example.
-input_data = numpy.matrix([
+input_data = numpy.array([
     [0,0],
     [0,1],
     [1,0],
     [1,1],
 ])
 
-desired_output = numpy.matrix([
+desired_output = numpy.array([
     [-1],
     [1],
     [1],

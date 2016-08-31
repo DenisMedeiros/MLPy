@@ -17,8 +17,8 @@ Its parameters are the following ones:
 * input_data:  Input data (table form - see example.py).
 * desired_output: Desired output (table form - see example.py).
 The functions returns:
-* hidden_layer_weights: Matrix with the weights of the hidden layer.
-* output_layer_weights: Matrix with the weights of the output layer.
+* hidden_layer_weights: Matrix (numpy array) with the weights of the hidden layer.
+* output_layer_weights: Matrix (numpy array) with the weights of the output layer.
 '''
 def trainning_algorithm(
         neurons_hidden_layer,
@@ -30,9 +30,9 @@ def trainning_algorithm(
         desired_output,
 ):
 
-    # Reorganize the input and output data.
-    input_data = numpy.transpose(input_data)
-    desired_output = numpy.transpose(desired_output)
+    # Reorganize the input and output data.to their transposed form.
+    input_data = input_data.T
+    desired_output = desired_output.T
 
     # Get details about the input and output.
     input_size, number_entries =  input_data.shape
@@ -67,7 +67,7 @@ def trainning_algorithm(
         desired_output = desired_output[:, new_order]
 
         # Find the output of the hidden layer.
-        hidden_layer_output = numpy.tanh(hidden_layer_weights * input_data_bias)
+        hidden_layer_output = numpy.tanh(hidden_layer_weights.dot(input_data_bias))
 
         # Add the bias to the hidden layer output.
         hidden_layer_output_bias = numpy.vstack(
@@ -78,7 +78,7 @@ def trainning_algorithm(
 
         # Find the output of the output layer.
         final_output = numpy.tanh(
-                                output_layer_weights * hidden_layer_output_bias
+                                output_layer_weights.dot(hidden_layer_output_bias)
         )
 
         # Calculate the static error.
@@ -91,8 +91,9 @@ def trainning_algorithm(
 
         delta_output_layer = (
                     (eta/number_entries) *
-                    delta_output_layer_temp *
-                    numpy.transpose(hidden_layer_output_bias)
+                    delta_output_layer_temp.dot(
+                        hidden_layer_output_bias.T
+                    )
         ) + alpha * previous_delta_output_layer_layer;
 
         previous_delta_output_layer_layer = delta_output_layer
@@ -107,9 +108,8 @@ def trainning_algorithm(
 
         delta_hidden_layer = (
                     (eta/number_entries) *
-                    delta_hidden_layer_temp_2 *
-                    numpy.transpose(input_data_bias)
-        ) + alpha * previous_delta_hidden_layer;
+                    delta_hidden_layer_temp_2.dot(input_data_bias.T)
+                )+ alpha * previous_delta_hidden_layer;
 
         previous_delta_hidden_layer = delta_hidden_layer
         hidden_layer_weights = hidden_layer_weights + delta_hidden_layer
@@ -117,7 +117,7 @@ def trainning_algorithm(
         # Calculate the total error.
         total_error = (
                 (1.0/(2 * number_entries)) *
-                numpy.trace(numpy.transpose(static_error) * static_error)
+                numpy.trace(static_error.T.dot(static_error))
         )
 
         if total_error < break_error or iterations >= break_iterations:
@@ -158,13 +158,13 @@ def validating_algorithm(
     )
 
     # Find the output of the hidden layer.
-    hidden_layer_output = numpy.tanh(hidden_layer_weights * input_data_bias)
+    hidden_layer_output = numpy.tanh(hidden_layer_weights.dot(input_data_bias))
 
     hidden_layer_output_bias = numpy.vstack(
                     (numpy.full((1, number_entries), -1.0), hidden_layer_output)
     )
 
     # Find the output of the output layer.
-    final_output = numpy.tanh(output_layer_weights * hidden_layer_output_bias)
+    final_output = numpy.tanh(output_layer_weights.dot(hidden_layer_output_bias))
 
     return final_output
